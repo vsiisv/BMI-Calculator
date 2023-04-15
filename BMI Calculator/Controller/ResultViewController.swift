@@ -9,7 +9,9 @@ import UIKit
 
 class ResultViewController: UIViewController {
 
-	var result: Float?
+	var result: String?
+	var advice: String?
+	var color: UIColor?
 	
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,8 +23,9 @@ class ResultViewController: UIViewController {
 	
 	
 	func showResult() {
-		guard let result else { return }
-		valueLabel.text = String(format: "%.2f", result)
+		valueLabel.text = result
+		recommendationLabel.text = advice
+		view.backgroundColor = color
 	}
     
 	@objc func recalculate() {

@@ -9,6 +9,8 @@ import UIKit
 
 class ViewController: UIViewController {
 	
+	var calculatorBrain = CalculatorBrain()
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
@@ -19,23 +21,27 @@ class ViewController: UIViewController {
 	@objc func sliderAction(_ sender: UISlider) {
 		let value = sender.value
 		let roundedValue = String(format: "%.2f", value)
-		if sender.maximumValue == 3.0 {
-			meterLabel.text = "\(roundedValue)m"
-		} else if sender.maximumValue == 200.0 {
-			kiloLabel.text = String("\(Int(value))Kg")
+		
+		switch sender.maximumValue {
+		case 3.0: meterLabel.text = "\(roundedValue)m"
+		case 200.0: kiloLabel.text = String("\(Int(value))Kg")
+		default: break
 		}
 	}
 	
 	@objc func buttonAction() {
 		let height = heightSlider.value
 		let weight = weightSlider.value
-		let bmi = weight / pow(height, 2) // (height * height)
-		presentResultViewController(result: bmi)
+
+		calculatorBrain.calculateBMI(height: height, weight: weight)
+		presentResultViewController()
 	}
 	
-	func presentResultViewController(result: Float) {
+	func presentResultViewController() {
 		let presentVC = ResultViewController()
-		presentVC.result = result
+		presentVC.result = calculatorBrain.getBMIValue()
+		presentVC.advice = calculatorBrain.getAdvice()
+		presentVC.color = calculatorBrain.getColor()
 		present(presentVC, animated: true)
 	}
 	
