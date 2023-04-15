@@ -12,37 +12,45 @@ class ViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
-		view.addSubview(calculateBackground)
-		view.addSubview(verticalStackView)
-		verticalStackView.addArrangedSubview(calculateLabel)
-		verticalStackView.addArrangedSubview(horizontalStack1)
-		verticalStackView.addArrangedSubview(heightSlider)
-		verticalStackView.addArrangedSubview(horizontalStack2)
-		verticalStackView.addArrangedSubview(widthSlider)
-		horizontalStack1.addArrangedSubview(heightLabel)
-		horizontalStack1.addArrangedSubview(meterLabel)
-		horizontalStack2.addArrangedSubview(weightLabel)
-		horizontalStack2.addArrangedSubview(kiloLabel)
-		verticalStackView.addArrangedSubview(calculateButton)
-		
-		setBackgroundImageConstraints()
-		setStackViewConstraints()
-		setConstraints()
-		setButtonConstraint()
+		addSubviewToView()
+		addConstraints()
 	}
-
+	
+	@objc func sliderAction(_ sender: UISlider) {
+		let value = sender.value
+		let roundedValue = String(format: "%.2f", value)
+		if sender.maximumValue == 3.0 {
+			meterLabel.text = "\(roundedValue)m"
+		} else if sender.maximumValue == 200.0 {
+			kiloLabel.text = String("\(Int(value))Kg")
+		}
+	}
+	
+	@objc func buttonAction() {
+		let height = heightSlider.value
+		let weight = weightSlider.value
+		let bmi = weight / pow(height, 2) // (height * height)
+		presentResultViewController(result: bmi)
+	}
+	
+	func presentResultViewController(result: Float) {
+		let presentVC = ResultViewController()
+		presentVC.result = result
+		present(presentVC, animated: true)
+	}
+	
 	// MARK: - View
 	lazy var horizontalStack1 = createHorizontalStackView()
 	lazy var horizontalStack2 = createHorizontalStackView()
 	
 	lazy var calculateLabel = createLabel(title: "CALCULATE YOUR BMI", fontSize: 40, weight: .bold, numberOfLines: 0)
 	lazy var heightLabel = createLabel(title: "Height", fontSize: 17, weight: .light)
-	lazy var meterLabel = createLabel(title: "1.5m", fontSize: 17, weight: .light)
+	lazy var meterLabel = createLabel(title: "0m", fontSize: 17, weight: .light)
 	lazy var weightLabel = createLabel(title: "Height", fontSize: 17, weight: .light)
-	lazy var kiloLabel = createLabel(title: "100Kg", fontSize: 17, weight: .light)
+	lazy var kiloLabel = createLabel(title: "0Kg", fontSize: 17, weight: .light)
 	
-	lazy var heightSlider = createSlider(value: 1.5, minimum: 0, maximum: 3)
-	lazy var widthSlider = createSlider(value: 100, minimum: 0, maximum: 200)
+	lazy var heightSlider = createSlider(minimum: 0, maximum: 3)
+	lazy var weightSlider = createSlider(minimum: 0, maximum: 200)
 	
 	lazy var calculateBackground: UIImageView = {
 		let imageView = UIImageView()
@@ -62,14 +70,18 @@ class ViewController: UIViewController {
 		return stackView
 	}()
 	
-	func createSlider(value: Float, minimum: Float, maximum: Float) -> UISlider {
+	func createSlider(minimum: Float, maximum: Float) -> UISlider {
 		let color = UIColor(red: 116/255, green: 114/255, blue: 210/255, alpha: 0.5)
 		let slider = UISlider()
-		slider.value = value
 		slider.minimumValue = minimum
 		slider.maximumValue = maximum
 		slider.minimumTrackTintColor = color
 		slider.thumbTintColor = color
+		slider.addTarget(
+			self,
+			action: #selector(sliderAction),
+			for: .valueChanged
+		)
 		return slider
 	}
 	
@@ -78,6 +90,11 @@ class ViewController: UIViewController {
 		button.setTitle("CALCULATE", for: .normal)
 		button.titleLabel?.font = UIFont.systemFont(ofSize: 20)
 		button.backgroundColor = UIColor(red: 98/255, green: 96/255, blue: 157/255, alpha: 1)
+		button.addTarget(
+			self,
+			action: #selector(buttonAction),
+			for: .touchUpInside
+		)
 		return button
 	}()
 	
@@ -127,7 +144,7 @@ class ViewController: UIViewController {
 			horizontalStack1.heightAnchor.constraint(equalToConstant: 21),
 			heightSlider.heightAnchor.constraint(equalToConstant: 60),
 			horizontalStack2.heightAnchor.constraint(equalToConstant: 21),
-			widthSlider.heightAnchor.constraint(equalToConstant: 60)
+			weightSlider.heightAnchor.constraint(equalToConstant: 60)
 		])
 	}
 	
@@ -136,6 +153,29 @@ class ViewController: UIViewController {
 			calculateButton.heightAnchor.constraint(equalToConstant: 51)
 		])
 	}
+	
+	// MARK: - Add sabviews
+	
+	func addSubviewToView() {
+		view.addSubview(calculateBackground)
+		view.addSubview(verticalStackView)
+		verticalStackView.addArrangedSubview(calculateLabel)
+		verticalStackView.addArrangedSubview(horizontalStack1)
+		verticalStackView.addArrangedSubview(heightSlider)
+		verticalStackView.addArrangedSubview(horizontalStack2)
+		verticalStackView.addArrangedSubview(weightSlider)
+		horizontalStack1.addArrangedSubview(heightLabel)
+		horizontalStack1.addArrangedSubview(meterLabel)
+		horizontalStack2.addArrangedSubview(weightLabel)
+		horizontalStack2.addArrangedSubview(kiloLabel)
+		verticalStackView.addArrangedSubview(calculateButton)
+	}
 
+	func addConstraints() {
+		setBackgroundImageConstraints()
+		setStackViewConstraints()
+		setConstraints()
+		setButtonConstraint()
+	}
 }
 
